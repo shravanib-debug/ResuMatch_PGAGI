@@ -1,0 +1,28 @@
+# Node
+node_modules/
+.next/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+env/
+.venv/
+
+# Environment variables
+.env
+.env.local
+
+# Databases and Data
+chroma_db/
+bm25_indexes/
+uploads/
+*.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
