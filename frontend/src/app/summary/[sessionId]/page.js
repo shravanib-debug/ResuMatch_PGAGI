@@ -9,7 +9,7 @@ import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Header from '@/components/layout/Header';
-import { getSummary, getSession } from '@/lib/api';
+import { getSummary, generateSummary, getSession } from '@/lib/api';
 
 export default function SummaryPage({ params }) {
   const { sessionId } = use(params);
@@ -24,7 +24,7 @@ export default function SummaryPage({ params }) {
     async function load() {
       try {
         const [sum, sess] = await Promise.all([
-          getSummary(sessionId),
+          getSummary(sessionId).catch(() => generateSummary(sessionId)),
           getSession(sessionId),
         ]);
         setSummary(sum);
