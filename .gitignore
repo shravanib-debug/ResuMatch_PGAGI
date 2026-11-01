@@ -15,8 +15,6 @@ env/
 .env.local
 
 # Databases and Data
-chroma_db/
-bm25_indexes/
 uploads/
 *.db
 
@@ -28,7 +26,6 @@ Thumbs.db
 *.md
 !README.md
 !DEPLOYMENT.md
-!backend/README.md
 
 # Logs
 *.log
