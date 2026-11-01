@@ -38,7 +38,8 @@ import logging
 import numpy as np
 
 import chromadb
-from sentence_transformers import SentenceTransformer, CrossEncoder
+from fastembed import TextEmbedding
+from fastembed.rerank.cross_encoder import TextCrossEncoder
 from rank_bm25 import BM25Okapi
 from google import genai
 from dataclasses import dataclass
@@ -53,8 +54,8 @@ from config import get_settings
 
 CHROMA_PATH     = "./chroma_db"
 BM25_PATH       = "./bm25_indexes"
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"
-RERANKER_MODEL  = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+RERANKER_MODEL  = "Xenova/ms-marco-MiniLM-L-6-v2"
 LLM_MODEL       = get_settings().llm_model
 
 # Retrieval knobs
@@ -107,11 +108,11 @@ class HybridRetriever:
 
         # Embedding model (same as ingestion — must match)
         log.info(f"  Loading embedding model: {EMBEDDING_MODEL}")
-        self.embedder = SentenceTransformer(EMBEDDING_MODEL)
+        self.embedder = TextEmbedding(EMBEDDING_MODEL, threads=1)
 
         # Cross-encoder reranker
         log.info(f"  Loading reranker: {RERANKER_MODEL}")
-        self.reranker = CrossEncoder(RERANKER_MODEL)
+        self.reranker = TextCrossEncoder(RERANKER_MODEL, threads=1)
 
         # ChromaDB client
         self.chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
@@ -275,7 +276,7 @@ class HybridRetriever:
                 "Run pipeline/ingest.py first."
             )
 
-        query_embedding = self.embedder.encode(query, convert_to_numpy=True).tolist()
+        query_embedding = next(iter(self.embedder.embed([query]))).tolist()
 
         results = collection.query(
             query_embeddings=[query_embedding],
@@ -447,8 +448,7 @@ class HybridRetriever:
         if not chunks:
             return []
 
-        pairs = [(query, chunk.text) for chunk in chunks]
-        ce_scores = self.reranker.predict(pairs)
+        ce_scores = np.array(list(self.reranker.rerank(query, [chunk.text for chunk in chunks], batch_size=4)))
 
         # Normalise cross-encoder scores to 0–1 range
         ce_min, ce_max = ce_scores.min(), ce_scores.max()

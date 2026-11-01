@@ -3,7 +3,7 @@ services:
     name: resumatch-api
     runtime: docker
     rootDir: backend
-    plan: standard
+    plan: free
     healthCheckPath: /ready
     autoDeploy: true
     envVars:

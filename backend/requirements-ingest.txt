@@ -1,0 +1,6 @@
+# Only for running ingest.py locally
+-r requirements.txt
+langchain-text-splitters==1.1.3
+sentence-transformers==6.2.0
+torch==2.15.0
+tqdm==4.70.1
