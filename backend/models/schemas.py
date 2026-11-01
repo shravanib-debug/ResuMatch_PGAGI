@@ -4,7 +4,7 @@ schemas.py — Pydantic Schemas for API Request/Response
 Defines all input/output shapes for FastAPI endpoints.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -80,6 +80,17 @@ class AnswerResponse(BaseModel):
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 
+def _to_text(value) -> str:
+    """Render a loosely typed LLM value as display text."""
+    if value is None:
+        return ""
+    if isinstance(value, list):
+        return "; ".join(_to_text(item) for item in value)
+    if isinstance(value, dict):
+        return "; ".join(_to_text(item) for item in value.values())
+    return str(value)
+
+
 class PerQuestionAssessment(BaseModel):
     """Assessment for a single Q&A pair."""
     question_text: str
@@ -88,6 +99,20 @@ class PerQuestionAssessment(BaseModel):
     score: float
     feedback: str
     what_was_missed: str
+
+    # LLM output is loosely typed: null, numbers and lists must not break the report.
+    @field_validator("question_text", "answer_text", "assessment", "feedback", "what_was_missed", mode="before")
+    @classmethod
+    def _coerce_text(cls, value):
+        return _to_text(value)
+
+    @field_validator("score", mode="before")
+    @classmethod
+    def _coerce_score(cls, value):
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return 0.0
 
 
 class SummaryResponse(BaseModel):
@@ -98,6 +123,11 @@ class SummaryResponse(BaseModel):
     gaps: list[str]
     per_question: list[PerQuestionAssessment]
     recommendations: list[str]
+
+    @field_validator("strengths", "gaps", "recommendations", mode="before")
+    @classmethod
+    def _coerce_text_list(cls, value):
+        return [_to_text(item) for item in value or []]
 
     class Config:
         from_attributes = True
