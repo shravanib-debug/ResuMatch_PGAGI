@@ -12,6 +12,7 @@ import logging
 import pdfplumber
 from google import genai
 from config import get_settings
+from llm_retry import generate_with_retry
 
 log = logging.getLogger(__name__)
 settings = get_settings()
@@ -81,10 +82,7 @@ Return ONLY the JSON. No explanation."""
     try:
         client = genai.Client(api_key=settings.google_api_key)
         
-        response = client.models.generate_content(
-            model=settings.llm_model,
-            contents=prompt,
-        )
+        response = generate_with_retry(client, prompt)
         raw = response.text.strip()
 
         # Strip markdown fences

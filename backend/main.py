@@ -13,13 +13,18 @@ Docs at: http://localhost:8000/docs
 from dotenv import load_dotenv
 load_dotenv()  # MUST be before other imports so os.getenv() works in retriever.py
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from pathlib import Path
+from fastapi import FastAPI, HTTPException
+from sqlalchemy import text
 from fastapi.middleware.cors import CORSMiddleware
 
-from database import init_db
+from config import get_settings
+from database import engine, init_db
 from routers import sessions, resume, interview, summary
+from services.rag_service import get_retriever
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 
@@ -39,6 +44,8 @@ async def lifespan(app: FastAPI):
     log.info("Starting up — creating database tables...")
     await init_db()
     log.info("Database ready.")
+    # Load ML models now so the first interview isn't slow and threads can't race the lazy init.
+    await asyncio.to_thread(get_retriever)
     yield
     log.info("Shutting down.")
 
@@ -57,8 +64,9 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",    # Next.js dev server
-        "http://127.0.0.1:3000",
+        origin.strip().rstrip("/")
+        for origin in get_settings().allowed_origins.split(",")
+        if origin.strip()
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -79,3 +87,18 @@ app.include_router(summary.router)
 async def health_check():
     """Simple health check endpoint."""
     return {"status": "healthy", "service": "ai-interview-system"}
+
+
+@app.get("/ready", tags=["health"])
+async def readiness_check():
+    """Report whether this instance can serve traffic (load-balancer probe)."""
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+    except Exception:
+        raise HTTPException(status_code=503, detail="Database unavailable")
+
+    if not list(Path("bm25_indexes").glob("*_bm25.pkl")) or not Path("chroma_db").is_dir():
+        raise HTTPException(status_code=503, detail="Indexes missing: run ingest.py")
+
+    return {"status": "ready"}

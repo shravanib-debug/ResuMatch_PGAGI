@@ -87,7 +87,7 @@ EMBEDDING_MODEL  = "all-MiniLM-L6-v2"
 EMBED_BATCH_SIZE = 64
 
 # Semantic chunking
-SIMILARITY_THRESHOLD = 0.75   # cosine sim drop below this → new chunk boundary
+SIMILARITY_THRESHOLD = 0.25   # adjacent-sentence median is ~0.33 for MiniLM on textbooks; 0.75 cut 99.7% of pairs
 MAX_CHUNK_CHARS      = 2000   # hard cap (~500 tokens). prevents runaway chunks
 MIN_CHUNK_CHARS      = 120    # discard fragments shorter than this
 MIN_CHUNK_SENTENCES  = 2      # a single sentence fragment is never a complete thought

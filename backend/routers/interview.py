@@ -7,6 +7,7 @@ GET  /api/v1/sessions/{id}/questions/{index}    → get single question by index
 POST /api/v1/sessions/{id}/answers              → submit an answer
 """
 
+import asyncio
 import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -66,7 +67,8 @@ async def start_interview(session_id: str, db: AsyncSession = Depends(get_db)):
 
     # Generate questions via RAG pipeline
     log.info(f"Starting interview for session {session_id}, role={session.role}")
-    question_dicts = generate_questions_for_session(
+    question_dicts = await asyncio.to_thread(
+        generate_questions_for_session,
         parsed_resume=session.parsed_resume,
         role=session.role,
         num_questions=settings.max_questions_per_session,

@@ -11,6 +11,7 @@ import json
 import logging
 from google import genai
 from config import get_settings
+from llm_retry import generate_with_retry
 
 log = logging.getLogger(__name__)
 settings = get_settings()
@@ -53,10 +54,7 @@ def generate_summary(
         client = genai.Client(api_key=settings.google_api_key)
         
         full_prompt = _system_prompt() + "\n\n" + prompt
-        response = client.models.generate_content(
-            model=settings.llm_model,
-            contents=full_prompt,
-        )
+        response = generate_with_retry(client, full_prompt)
         raw = response.text.strip()
 
         # Strip markdown fences

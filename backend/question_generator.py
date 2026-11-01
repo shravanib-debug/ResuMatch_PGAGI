@@ -24,6 +24,7 @@ import re
 import json
 import random
 import logging
+from llm_retry import generate_with_retry
 
 from google import genai
 from dataclasses import dataclass
@@ -93,10 +94,7 @@ class QuestionGenerator:
 
         try:
             full_prompt = self._batch_system_prompt(num_questions) + "\n\n" + prompt
-            response = self.llm.models.generate_content(
-                model=LLM_MODEL,
-                contents=full_prompt,
-            )
+            response = generate_with_retry(self.llm, full_prompt)
             raw = response.text.strip()
             return self._parse_batch_response(raw, context_chunks)
 

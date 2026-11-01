@@ -27,3 +27,8 @@ Thumbs.db
 # Documentation
 *.md
 !README.md
+!DEPLOYMENT.md
+!backend/README.md
+
+# Logs
+*.log

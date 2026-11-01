@@ -27,7 +27,7 @@ export default function Header({ subtitle }) {
           letterSpacing: '-0.02em',
         }}
       >
-        PGAGI
+        ResuMatch
         {subtitle && (
           <span
             style={{

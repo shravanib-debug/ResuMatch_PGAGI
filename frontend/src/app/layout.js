@@ -1,7 +1,7 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'PGAGI — AI-Powered Interview System',
+  title: 'ResuMatch — AI-Powered Interview System',
   description: 'Dynamic AI interview system using Hybrid Agentic RAG to generate personalised technical questions based on your resume.',
 };
 

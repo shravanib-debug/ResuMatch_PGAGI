@@ -4,6 +4,7 @@ resume.py — Resume Upload Router
 POST /api/v1/sessions/{id}/resume → upload PDF, parse, update session
 """
 
+import asyncio
 import logging
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -50,7 +51,7 @@ async def upload_resume(
 
     # Extract text from PDF
     log.info(f"Extracting text from resume: {file.filename}")
-    resume_text = extract_text_from_pdf(contents)
+    resume_text = await asyncio.to_thread(extract_text_from_pdf, contents)
 
     if not resume_text or len(resume_text.strip()) < 50:
         raise HTTPException(
@@ -61,7 +62,7 @@ async def upload_resume(
 
     # Parse resume with LLM
     log.info("Parsing resume with LLM...")
-    parsed_resume = parse_resume_with_llm(resume_text)
+    parsed_resume = await asyncio.to_thread(parse_resume_with_llm, resume_text)
 
     # Update session
     session.resume_text = resume_text

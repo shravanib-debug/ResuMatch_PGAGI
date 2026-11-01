@@ -28,8 +28,8 @@ class Session(Base):
     # Status flow: created → resume_uploaded → interview_started → interview_completed → summarized
     resume_text = Column(Text, nullable=True)
     parsed_resume = Column(JSON, nullable=True)
-    created_at = Column(DateTime, default=utc_now)
-    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
+    created_at = Column(DateTime(timezone=True), default=utc_now)
+    updated_at = Column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
 
 
 class Question(Base):
@@ -44,7 +44,7 @@ class Question(Base):
     difficulty = Column(String, default="mid")
     source_concept = Column(String, nullable=True)
     context_chunks = Column(JSON, nullable=True)  # list of chunk IDs for traceability
-    created_at = Column(DateTime, default=utc_now)
+    created_at = Column(DateTime(timezone=True), default=utc_now)
 
 
 class Answer(Base):
@@ -55,7 +55,7 @@ class Answer(Base):
     session_id = Column(String, ForeignKey("sessions.id"), nullable=False)
     question_id = Column(String, ForeignKey("questions.id"), nullable=False)
     answer_text = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=utc_now)
+    created_at = Column(DateTime(timezone=True), default=utc_now)
 
 
 class Summary(Base):
@@ -69,4 +69,4 @@ class Summary(Base):
     gaps = Column(JSON, nullable=True)             # list of strings
     per_question = Column(JSON, nullable=True)     # list of assessment dicts
     recommendations = Column(JSON, nullable=True)  # list of strings
-    created_at = Column(DateTime, default=utc_now)
+    created_at = Column(DateTime(timezone=True), default=utc_now)

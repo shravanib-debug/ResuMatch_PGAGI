@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     retrieval_top_k: int = 4
     min_similarity_score: float = 0.5
 
+    # CORS: comma-separated browser origins allowed to call this API
+    allowed_origins: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001"
+
     # File Upload
     upload_dir: str = "./uploads"
     max_file_size_mb: int = 5

@@ -5,6 +5,7 @@ POST /api/v1/sessions/{id}/summary → generate interview summary
 GET  /api/v1/sessions/{id}/summary → get stored summary
 """
 
+import asyncio
 import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -52,7 +53,8 @@ async def create_summary(session_id: str, db: AsyncSession = Depends(get_db)):
 
     # Generate summary via LLM
     log.info(f"Generating summary for session {session_id}")
-    summary_data = generate_summary(
+    summary_data = await asyncio.to_thread(
+        generate_summary,
         parsed_resume=session.parsed_resume or {},
         role=session.role,
         qa_pairs=qa_pairs,

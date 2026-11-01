@@ -1,15 +1,1 @@
-fastapi
-uvicorn[standard]
-pydantic-settings
-sqlalchemy
-aiosqlite
-pdfplumber
-chromadb
-sentence-transformers
-openai
-python-multipart
-langchain-text-splitters
-rank_bm25
-numpy
-tqdm
-python-dotenv
+-r backend/requirements.txt

@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+*.log
+*.db
+__pycache__/
+*.pyc
+knowledge_base/
+uploads/
+test_*.py
+test_out.txt
+debug_headings.py

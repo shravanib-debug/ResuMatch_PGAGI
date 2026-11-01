@@ -99,4 +99,3 @@ No system is perfect. For a true production deployment, the following changes wo
 *   **PDF heading detection:** Heading detection in `pdfplumber` relies on regex and font-size heuristics. Highly unusual PDF layouts occasionally cause chunks to inherit the wrong section title.
 
 ---
-*Developed as part of the PGAGI AI/ML & Backend Assignment.*
